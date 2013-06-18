@@ -78,23 +78,28 @@ class JsonAdminCommandProvider(Component):
   
     def _set_priority_from_config(self):
         changes = self._do_set_from_config('priority')
-        if changes: printout(json.dumps(changes))
+        if changes: 
+            printout(json.dumps({'changed':True, 'comment':changes}))
      
     def _set_severity_from_config(self):
         changes = self._do_set_from_config('severity')
-        if changes: printout(json.dumps(changes))
+        if changes: 
+            printout(json.dumps({'changed':True, 'comment':changes}))
      
     def _set_resolution_from_config(self):
         changes = self._do_set_from_config('resolution')
-        if changes: printout(json.dumps(changes))
+        if changes: 
+            printout(json.dumps({'changed':True, 'comment':changes}))
      
     def _set_ticket_type_from_config(self):
         changes = self._do_set_from_config('ticket_type')
-        if changes: printout(json.dumps(changes))
+        if changes: 
+            printout(json.dumps({'changed':True, 'comment':changes}))
  
     def _set_component_from_config(self):
         changes = self._do_set_from_config('component')
-        if changes: printout(json.dumps(changes))
+        if changes: 
+            printout(json.dumps({'changed':True, 'comment':changes}))
  
 
     def _get_panel(self, enum):
@@ -141,11 +146,11 @@ class JsonAdminCommandProvider(Component):
             return changes 
 
         # TODO: what should the config section be named? 
-        section = self.config['trac-admin-iniasdf']
-        print section
-        if not section:
+        section = self.config['trac-admin-ini']
+        if not section: # this is always true because
+            # a section object is always created ...
             raise TracError(_('section not found'))
-            #return changes 
+            return changes 
 
         # get config_items from trac.ini
         config_items = section.getlist(enum)
