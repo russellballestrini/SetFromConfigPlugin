@@ -7,6 +7,7 @@ setup(
     entry_points = {
         'trac.plugins': [
             'setfromconfig = setfromconfig.setfromconfig',
+            'jsontracadmin = jsontracadmin.jsontracadmin',
         ],
     },
 )
