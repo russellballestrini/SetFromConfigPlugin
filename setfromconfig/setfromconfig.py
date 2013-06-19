@@ -43,26 +43,9 @@ class SetFromConfigAdminCommandProvider(Component):
         #yield ('command regex', '<arg>',
         #       'trac-admin help text',
         #       self.tab_complete_callback, self.command_callback)
-        ######yield ('priority set from config', None,
-        ######       'Set ticket priorities from config',
-        ######       None, self.set_priority_from_config)
-        ######yield ('severity set from config', None,
-        ######       'Set ticket severities from config',
-        ######       None, self.set_severity_from_config)
-        ######yield ('resolution set from config', None,
-        ######       'Set ticket resolutions from config',
-        ######       None, self.set_resolution_from_config)
-        ######yield ('ticket_type set from config', None,
-        ######       'Set ticket types from config',
-        ######       None, self.set_ticket_type_from_config)
-        ######yield ('component set from config', None,
-        ######       'Set components from config',
-        ######       None, self.set_component_from_config)
-        yield ('set all from config', None,
-               'set all from config',
+        yield ('set from config', None,
+               'set priority, severity, resolution, ticket_type, component, from trac.ini',
                None, self.set_all_from_config)
-
-    # the following functions set various enums from config (trac.ini)
 
     def get_panels(self):
         """return a dict of panels"""
@@ -74,24 +57,8 @@ class SetFromConfigAdminCommandProvider(Component):
           'component':   ComponentAdminPanel(self.env),
         } 
  
-   ###### def set_priority_from_config(self):
-   ######     panel = PriorityAdminPanel(self.env)
-   ######     self._set_enum_from_config(panel)
-   ######  
-   ###### def set_severity_from_config(self):
-   ######     panel = SeverityAdminPanel(self.env)
-   ######     self._set_enum_from_config(panel)
-   ######  
-   ###### def set_resolution_from_config(self):
-   ######     panel = ResolutionAdminPanel(self.env)
-   ######     self._set_enum_from_config(panel)
-   ######  
-   ###### def set_ticket_type_from_config(self):
-   ######     panel = TicketTypeAdminPanel(self.env)
-   ######     self._set_enum_from_config(panel)
- 
     def set_all_from_config(self):
-        
+        """make database reflect trac.ini config"""
         # keep track of changes
         changes = {}
         changed = False
@@ -102,7 +69,7 @@ class SetFromConfigAdminCommandProvider(Component):
             if name == "component":
                 change = self._set_component_from_config(panel)
             else:
-                change = self._set_enum_from_config(panel)
+                change = self._set_enum_from_config(panel, name)
             if change:
                 changes[name] = change
                 changed = True
@@ -115,7 +82,6 @@ class SetFromConfigAdminCommandProvider(Component):
         """
         Accept an option_name, fetch and return config_items from config (trac.ini)
         Raise TracError and exit if section not found!
-        TODO: Raise TracError and exit if option not found!
         """
         # check if section exists in trac.ini
         if self.section_name not in self.config:
@@ -125,10 +91,8 @@ class SetFromConfigAdminCommandProvider(Component):
 
         # from config object, from section object, return list for enum
         return self.config[self.section_name].getlist(option_name)
-
            
-    #def _set_enum_from_config(self, panel, stdout=True):
-    def _set_enum_from_config(self, panel):
+    def _set_enum_from_config(self, panel, enum_name):
         """
         Accept panel object
         Fetch config_items from config (trac.ini)
@@ -136,11 +100,10 @@ class SetFromConfigAdminCommandProvider(Component):
         * Remove items from database not present in config (trac.ini)
         * Add items from config (trac.ini) not present in database
         Return dictionary of changes
-        If stdout == True print changes as json
         """
+        # TODO: leave this method if config_items is missing or empty
         # get config_items from Trac config (trac.ini)
-        enum_type = getattr(panel,'_command_type', panel._type)
-        config_items = self._get_config_items(enum_type)
+        config_items = self._get_config_items(enum_name)
 
         # get current_items from Trac database
         current_items = panel.get_enum_list()
@@ -159,16 +122,13 @@ class SetFromConfigAdminCommandProvider(Component):
             if config_item not in current_items:
                 panel._do_add(config_item)
                 changes[config_item] = 'Added'
-        
-        #if stdout and changes: 
-        #    printout(json.dumps({'changed':True, 'comment':changes}))
  
         return changes
 
     def _set_component_from_config(self, panel):
         """
-        same as _set_enum_from_config but handle the special component case
-        components have owners and a different method to get list of items
+        similar to _set_enum_from_config however components
+        have a different method to get list and also have owners
         """
         # config comonenets
         config_items = self._get_config_items('component')
@@ -194,9 +154,5 @@ class SetFromConfigAdminCommandProvider(Component):
                 panel._do_add(config_item, component_owner)
                 changes[config_item] = 'Added'
         
-        #if stdout and changes: 
-        #if changes: 
-        #    printout(json.dumps({'changed':True, 'comment':changes}))
-
         return changes
 
