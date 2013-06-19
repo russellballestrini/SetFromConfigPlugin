@@ -6,19 +6,36 @@ from trac.util.text import printout
 import json
 
 # import each of the panels we would like to support
-from trac.ticket.admin import ComponentAdminPanel
 from trac.ticket.admin import PriorityAdminPanel
 from trac.ticket.admin import SeverityAdminPanel
-from trac.ticket.admin import TicketTypeAdminPanel
 from trac.ticket.admin import ResolutionAdminPanel
+from trac.ticket.admin import TicketTypeAdminPanel
+from trac.ticket.admin import ComponentAdminPanel
 
-# Need the following to create list of [(component,owner),...]
-from trac.ticket.model import Component as TicketComponent
-from trac.util.translation import _
+"""
+This plugin does nothing unless you create a section
+in your trac.ini that called [trac-admin-ini]
+
+Valid options for this section:
+
+* priority = coma,separated,list,of,values
+* severity = coma,separated,list,of,values
+* resolution = coma,separated,list,of,values
+* ticket_type = coma,separated,list,of,values
+* component = coma,separated,list,of,values
+* component_owner = username 
+
+All other options will be ignored.
+"""
+
 
 class SetFromConfigAdminCommandProvider(Component):
     implements(IAdminCommandProvider)
-    
+   
+    # section_name in config (trac.ini) that we will look for
+    # TODO: what should the config section be named? 
+    section_name = 'trac-admin-ini'
+ 
     # IAdminCommandProvider methods
 
     def get_admin_commands(self):
@@ -39,86 +56,75 @@ class SetFromConfigAdminCommandProvider(Component):
         yield ('ticket_type set from config', None,
                'Set ticket types from config',
                None, self._set_ticket_type_from_config)
-        yield ('component set from config', None,
-               'Set components from config',
-               None, self._set_component_from_config)
+        #yield ('component set from config', None,
+        #       'Set components from config',
+        #       None, self._set_component_from_config)
+        #yield ('set all from config', None,
+        #       'set all from config',
+        #       None, self._set_all_from_config)
 
     # the following functions set various enums from config (trac.ini)
   
     def _set_priority_from_config(self):
-        changes = self._set_from_config('priority')
-        if changes: 
-            printout(json.dumps({'changed':True, 'comment':changes}))
+        panel = PriorityAdminPanel(self.env)
+        self._set_enum_from_config(panel)
      
     def _set_severity_from_config(self):
-        changes = self._set_from_config('severity')
-        if changes: 
-            printout(json.dumps({'changed':True, 'comment':changes}))
+        panel = SeverityAdminPanel(self.env)
+        self._set_enum_from_config(panel)
      
     def _set_resolution_from_config(self):
-        changes = self._set_from_config('resolution')
-        if changes: 
-            printout(json.dumps({'changed':True, 'comment':changes}))
+        panel = ResolutionAdminPanel(self.env)
+        self._set_enum_from_config(panel)
      
     def _set_ticket_type_from_config(self):
-        changes = self._set_from_config('ticket_type')
-        if changes: 
-            printout(json.dumps({'changed':True, 'comment':changes}))
+        panel = TicketTypeAdminPanel(self.env)
+        self._set_enum_from_config(panel)
  
-    def _set_component_from_config(self):
-        changes = self._set_from_config('component')
-        if changes: 
-            printout(json.dumps({'changed':True, 'comment':changes}))
+    #def _set_component_from_config(self):
+    #    panel = ComponentAdminPanel(self.env)
+    #    current_items = panel.get_component_list()
+    #                 #panel._do_add(config_item,section.get('component_owner'))
+    #    changes = self._set_enum_from_config('component', panel)
+    #    if changes: 
+    #        printout(json.dumps({'changed':True, 'comment':changes}))
  
 
-    def _get_panel(self, enum):
-        """accept an enum, return panel or None"""
-        if enum == 'priority':
-            return PriorityAdminPanel(self.env)
-        elif enum == 'severity':
-            return SeverityAdminPanel(self.env)
-        elif enum == 'resolution':
-            return ResolutionAdminPanel(self.env)
-        elif enum == 'ticket_type':
-            return TicketTypeAdminPanel(self.env)
-        elif enum == 'component':
-            return ComponentAdminPanel(self.env)
-        else:
-            return None
+    def _get_config_items(self, option_name):
+        """
+        Accept an option_name, fetch and return config_items from config (trac.ini)
+        Raise TracError and exit if section not found!
+        TODO: Raise TracError and exit if option not found!
+        """
+        # check if section exists in trac.ini
+        if self.section_name not in self.config:
+            message = 'section %s not found in config' % self.section_name
+            printout(message)
+            raise TracError(_(message))
+
+        # from config object, from section object, return list for enum
+        return self.config[self.section_name].getlist(option_name)
 
            
-    def _set_from_config(self, enum):
+    def _set_enum_from_config(self, panel, stdout=True):
         """
-        Accept an enum
-        Fetch items from config (trac.ini)
-        Fetch items from database
+        Accept panel object
+        Fetch config_items from config (trac.ini)
+        Fetch current_items from database
         * Remove items from database not present in config (trac.ini)
         * Add items from config (trac.ini) not present in database
         Return dictionary of changes
+        If stdout == True print changes as json
         """
-        # keep track of what we change
-        changes = {}
-
-        panel = self._get_panel(enum)
-        if not panel:
-            raise TracError(_('%s is not a valid panel') % enum )
-            return changes 
-
-        # TODO: what should the config section be named? 
-        section = self.config['trac-admin-ini']
-        if not section: # this is always true because
-            # a section object is always created ...
-            raise TracError(_('section not found'))
-            return changes 
-
-        # get config_items from trac.ini
-        config_items = section.getlist(enum)
+        # get config_items from Trac config (trac.ini)
+        enum_type = getattr(panel,'_command_type', panel._type)
+        config_items = self._get_config_items(enum_type)
 
         # get current_items from Trac database
-        if enum == 'component':
-            current_items = panel.get_component_list()
-        else:
-            current_items = panel.get_enum_list()
+        current_items = panel.get_enum_list()
+
+        # keep track of what we change
+        changes = {}
 
         # remove items from database not present in config (trac.ini)
         for current_item in current_items:
@@ -129,11 +135,11 @@ class SetFromConfigAdminCommandProvider(Component):
         # add items from config (trac.ini) not present in database
         for config_item in config_items:
             if config_item not in current_items:
-                if enum == 'component':
-                    panel._do_add(config_item,section.get('component_owner'))
-                else: 
-                    panel._do_add(config_item)
+                panel._do_add(config_item)
                 changes[config_item] = 'Added'
-   
+        
+        if stdout and changes: 
+            printout(json.dumps({'changed':True, 'comment':changes}))
+ 
         return changes
 
