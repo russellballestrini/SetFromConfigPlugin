@@ -1,17 +1,17 @@
 SetFromConfigPlugin
 ===================
 
-This is a Trac plugin which extends the trac-admin utility to provide the 'set from config' command.  This command makes it possibly to specify ticket priority, severity, resolution, ticket\_type, and component lists in the Trac config (trac.ini) instead of trac-admin commands.
+We wrote this Trac plugin because we needed a way to provision and maintain multiple Trac instances via configuration management like salt-stack or puppet.  This Trac plugin extends the trac-admin utility to provide the 'set from config' command.  This command makes it possibly to declare ticket priority, severity, resolution, ticket\_type, and component options in the Trac config (trac.ini) instead of using the interactive admin web panel or trac-admin tools.
 
-We wrote this plugin because we needed a method to deploy and maintain Trac instances via configuration management like salt-stack or puppet.
 
-This plugin will do nothing if the *[trac-admin-ini]* section is not created in trac.ini.
+This plugin requires a section labeled *[set-from-config-plugin]* in the projects trac.ini.
+If this section is missing, this plugin will not perform any changes.
 
-Here is an example configuration snippet:
+The following shows a complete and valid configuration snippet:
 
 .. code-block::
 
- [trac-admin-ini]
+ [set-from-config-plugin]
 
  priority = P1,P2,P3,P4,P90x
  severity = High,Medium,Low,Blocker
@@ -21,13 +21,15 @@ Here is an example configuration snippet:
  component_owner = username 
  component = webapp/www,webapp/blog,iphone/buttons,iphone/fonts
 
+If an option, like severity, is missing from the configuration section, it is skipped.
+Any options added to this section that are not mentioned above will be ignored.
+
 Warning:
- This plugin will remove items in your database if not present 
- in the configuration option list.
+ Always back up your database before trying new plugins.
+ The SetFromConfigPlugin alters a Trac project's database to reflect the option listed.
 
-Note:
- All other options will be ignored.
+ If an option entry is:
 
-Note:
- If a option is missing it is skipped.
-
+ * in the database but not in the configuration, it will be removed.
+ * not in the database but is in the configuration, it will be added.
+ 
