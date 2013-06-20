@@ -32,4 +32,5 @@ Warning:
 
  * in the database but not in the configuration, it will be removed.
  * not in the database but is in the configuration, it will be added.
- 
+
+This plugin has great test coverage.  : ) 

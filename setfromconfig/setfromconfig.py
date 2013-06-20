@@ -28,10 +28,12 @@ class SetFromConfigAdminCommand(Component):
         #       'trac-admin help text',
         #       self.tab_complete_callback, self.command_callback)
         yield ('set from config', None,
-               'set priority, severity, resolution, ticket_type, component, from trac.ini',
+               """set all option values from configuration (trac.ini)
+
+               priority, severity, resolution, ticket_type, and component""",
                None, self.set_all_from_config)
 
-    def get_panels(self):
+    def _get_panels(self):
         """return a dict of panels"""
         return {
           'priority':    PriorityAdminPanel(self.env),
@@ -47,7 +49,7 @@ class SetFromConfigAdminCommand(Component):
         changes = {}
         changed = False
 
-        panels = self.get_panels()
+        panels = self._get_panels()
 
         for name,panel in panels.items():
             if name == "component":
@@ -71,7 +73,7 @@ class SetFromConfigAdminCommand(Component):
         if self.section_name not in self.config:
             message = 'section %s not found in config' % self.section_name
             printout(message)
-            raise TracError(_(message))
+            raise TracError(message)
 
         # from config object, from section object, return list for enum
         return self.config[self.section_name].getlist(option_name)
