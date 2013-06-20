@@ -101,15 +101,16 @@ class SetFromConfigAdminCommandProvider(Component):
         * Add items from config (trac.ini) not present in database
         Return dictionary of changes
         """
-        # TODO: leave this method if config_items is missing or empty
+        # keep track of what we change
+        changes = {}
+
         # get config_items from Trac config (trac.ini)
         config_items = self._get_config_items(enum_name)
+        if not config_items:
+            return changes
 
         # get current_items from Trac database
         current_items = panel.get_enum_list()
-
-        # keep track of what we change
-        changes = {}
 
         # remove items from database not present in config (trac.ini)
         for current_item in current_items:
@@ -130,17 +131,19 @@ class SetFromConfigAdminCommandProvider(Component):
         similar to _set_enum_from_config however components
         have a different method to get list and also have owners
         """
-        # config comonenets
+        # keep track of what we change
+        changes = {}
+
+        # get config_items (components) from Trac config (trac.ini)
         config_items = self._get_config_items('component')
+        if not config_items:
+            return changes
 
         # component_owner
         component_owner = self.config[self.section_name].get('component_owner')
 
         # database comonenets
         current_items = panel.get_component_list()
-
-        # keep track of what we change
-        changes = {}
 
         # remove items from database not present in config (trac.ini)
         for current_item in current_items:
