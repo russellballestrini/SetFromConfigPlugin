@@ -12,21 +12,6 @@ from trac.ticket.admin import ResolutionAdminPanel
 from trac.ticket.admin import TicketTypeAdminPanel
 from trac.ticket.admin import ComponentAdminPanel
 
-"""
-This plugin does nothing unless you create a section
-in your trac.ini that called [trac-admin-ini]
-
-Valid options for this section:
-
-* priority = coma,separated,list,of,values
-* severity = coma,separated,list,of,values
-* resolution = coma,separated,list,of,values
-* ticket_type = coma,separated,list,of,values
-* component = coma,separated,list,of,values
-* component_owner = username 
-
-All other options will be ignored.
-"""
 
 class SetFromConfigAdminCommandProvider(Component):
     implements(IAdminCommandProvider)

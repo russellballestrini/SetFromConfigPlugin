@@ -24,42 +24,42 @@ class JsonAdminCommandProvider(Component):
         #yield ('command regex', '<arg>',
         #       'trac-admin help text',
         #       self.tab_complete_callback, self.command_callback)
-        yield ('priority json list', None,
+        yield ('priority json list', '',
                'Show possible ticket priorities in json',
-               None, self._list_priority_in_json)
-        yield ('severity json list', None,
+               None, self.list_priority_in_json)
+        yield ('severity json list', '',
                'Show possible ticket severities in json',
-               None, self._list_severity_in_json)
-        yield ('resolution json list', None,
+               None, self.list_severity_in_json)
+        yield ('resolution json list', '',
                'Show possible ticket resolutions in json',
-               None, self._list_resolution_in_json)
-        yield ('ticket_type json list', None,
+               None, self.list_resolution_in_json)
+        yield ('ticket_type json list', '',
                'Show possible ticket types in json',
-               None, self._list_ticket_type_in_json)
-        yield ('component json list', None,
+               None, self.list_ticket_type_in_json)
+        yield ('component json list', '',
                'Show available components in json',
-               None, self._list_component_in_json)
+               None, self.list_component_in_json)
 
     # the following methods list various enums in json
 
-    def _list_priority_in_json(self):
+    def list_priority_in_json(self):
         panel = PriorityAdminPanel(self.env)
         printout(json.dumps(panel.get_enum_list()))
      
-    def _list_severity_in_json(self):
+    def list_severity_in_json(self):
         panel = SeverityAdminPanel(self.env)
         printout(json.dumps(panel.get_enum_list()))
      
-    def _list_resolution_in_json(self):
+    def list_resolution_in_json(self):
         panel = ResolutionAdminPanel(self.env)
         printout(json.dumps(panel.get_enum_list()))
      
-    def _list_ticket_type_in_json(self):
+    def list_ticket_type_in_json(self):
         panel = TicketTypeAdminPanel(self.env)
         printout(json.dumps(panel.get_enum_list()))
      
-    def _list_component_in_json(self):
+    def list_component_in_json(self):
         # stolen from trac.ticket.admin.py format: [(component,owner)]
         components = [(c.name, c.owner) for c in TicketComponent.select(self.env)], [_('Name'), _('Owner')]
-        printout(components)
+        printout(json.dumps(components))
    
