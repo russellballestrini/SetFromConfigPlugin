@@ -17,8 +17,7 @@ class SetFromConfigAdminCommandProvider(Component):
     implements(IAdminCommandProvider)
    
     # section_name in config (trac.ini) that we will look for
-    # TODO: what should the config section be named? 
-    section_name = 'trac-admin-ini'
+    section_name = 'set-from-config-plugin'
  
     # IAdminCommandProvider methods
 
