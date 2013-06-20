@@ -1,0 +1,1 @@
+from .setfromconfig import *
