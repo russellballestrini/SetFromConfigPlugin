@@ -1,1 +1,1 @@
-from .setfromconfig import *
+from .setfromconfigtests import *

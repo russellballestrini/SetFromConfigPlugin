@@ -13,12 +13,12 @@ from trac.ticket.admin import TicketTypeAdminPanel
 from trac.ticket.admin import ComponentAdminPanel
 
 
-class SetFromConfigAdminCommandProvider(Component):
+class SetFromConfigAdminCommand(Component):
     implements(IAdminCommandProvider)
-   
+
     # section_name in config (trac.ini) that we will look for
     section_name = 'set-from-config-plugin'
- 
+
     # IAdminCommandProvider methods
 
     def get_admin_commands(self):
@@ -39,8 +39,8 @@ class SetFromConfigAdminCommandProvider(Component):
           'resolution':  ResolutionAdminPanel(self.env),
           'ticket_type': TicketTypeAdminPanel(self.env),
           'component':   ComponentAdminPanel(self.env),
-        } 
- 
+        }
+
     def set_all_from_config(self):
         """make database reflect trac.ini config"""
         # keep track of changes
@@ -48,7 +48,7 @@ class SetFromConfigAdminCommandProvider(Component):
         changed = False
 
         panels = self.get_panels()
-       
+
         for name,panel in panels.items():
             if name == "component":
                 change = self._set_component_from_config(panel)
@@ -75,7 +75,7 @@ class SetFromConfigAdminCommandProvider(Component):
 
         # from config object, from section object, return list for enum
         return self.config[self.section_name].getlist(option_name)
-           
+
     def _set_enum_from_config(self, panel, enum_name):
         """
         Accept panel object
@@ -99,15 +99,15 @@ class SetFromConfigAdminCommandProvider(Component):
         # remove items from database not present in config (trac.ini)
         for current_item in current_items:
             if current_item not in config_items:
-                panel._do_remove(current_item) 
+                panel._do_remove(current_item)
                 changes[current_item] = 'Removed'
-   
+
         # add items from config (trac.ini) not present in database
         for config_item in config_items:
             if config_item not in current_items:
                 panel._do_add(config_item)
                 changes[config_item] = 'Added'
- 
+
         return changes
 
     def _set_component_from_config(self, panel):
@@ -132,14 +132,14 @@ class SetFromConfigAdminCommandProvider(Component):
         # remove items from database not present in config (trac.ini)
         for current_item in current_items:
             if current_item not in config_items:
-                panel._do_remove(current_item) 
+                panel._do_remove(current_item)
                 changes[current_item] = 'Removed'
-   
+
         # add items from config (trac.ini) not present in database
         for config_item in config_items:
             if config_item not in current_items:
                 panel._do_add(config_item, component_owner)
                 changes[config_item] = 'Added'
-        
+
         return changes
 
