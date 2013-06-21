@@ -61,6 +61,6 @@ class JsonAdminCommandProvider(Component):
     def list_component_in_json(self):
         # stolen from trac.ticket.admin.py format: [(component,owner)]
         #components = [(c.name, c.owner) for c in TicketComponent.select(self.env)], [_('Name'), _('Owner')]
-        components = [{'name':c.name}, {'owner':c.owner} for c in TicketComponent.select(self.env)]
+        components = [{'name':c.name,'owner':c.owner} for c in TicketComponent.select(self.env)]
         printout(json.dumps(components))
    
