@@ -39,7 +39,7 @@ class SetFromConfigTestCase(unittest.TestCase):
           'component': ['new/blog','new/site','old/blog','old/site'],
         }
 
-    def priority_gets_set_successfully_test(self):
+    def test_priority_set_successful(self):
         """
         When we add custom priority enum values to the config
         and call SetFromConfigAdminCommand.set_all_from_config()
@@ -63,7 +63,7 @@ class SetFromConfigTestCase(unittest.TestCase):
 
         self.assertItemsEqual(panel.get_enum_list(), self.new['priority'])
 
-    def severity_gets_set_successfully_test(self):
+    def test_severity_set_successful(self):
         """
         When we add custom severity enum values to the config
         and call SetFromConfigAdminCommand.set_all_from_config()
@@ -87,7 +87,7 @@ class SetFromConfigTestCase(unittest.TestCase):
 
         self.assertItemsEqual(panel.get_enum_list(), self.new['severity'])
 
-    def resolution_gets_set_successfully_test(self):
+    def test_resolution_set_successful(self):
         """
         When we add custom resolution enum values to the config
         and call SetFromConfigAdminCommand.set_all_from_config()
@@ -111,7 +111,7 @@ class SetFromConfigTestCase(unittest.TestCase):
 
         self.assertItemsEqual(panel.get_enum_list(), self.new['resolution'])
 
-    def ticket_type_gets_set_successfully_test(self):
+    def test_ticket_type_set_successful(self):
         """
         When we add custom ticket_type enum values to the config
         and call SetFromConfigAdminCommand.set_all_from_config()
@@ -135,7 +135,7 @@ class SetFromConfigTestCase(unittest.TestCase):
 
         self.assertItemsEqual(panel.get_enum_list(), self.new['ticket_type'])
 
-    def component_gets_set_successfully_test(self):
+    def test_component_set_successful(self):
         """
         When we add custom component enum values to the config
         and call SetFromConfigAdminCommand.set_all_from_config()
@@ -237,7 +237,7 @@ class SetFromConfigTestCase(unittest.TestCase):
         # TracError when [set-from-config-plugin] missing and admin cmd invoked
         self.assertRaises(TracError, admin_command.set_all_from_config)
 
-        # verify that the present section but missing options does not alter db
+        # verify that the missing section does not alter db
         for name, panel in panels.items():
             if name == 'component':
                 self.assertItemsEqual(
@@ -299,7 +299,7 @@ class SetFromConfigTestCase(unittest.TestCase):
         admin_command = SetFromConfigAdminCommand(self.env)
         admin_command.set_all_from_config()
 
-        # verify that present section but missing options does not alter db
+        # verify that invalid options in section does not alter db
         for name, panel in panels.items():
             if name == 'component':
                 self.assertItemsEqual(
