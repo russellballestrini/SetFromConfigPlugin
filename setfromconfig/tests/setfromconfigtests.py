@@ -151,6 +151,8 @@ class SetFromConfigTestCase(unittest.TestCase):
         # create the section, option, and values in configuration
         self.env.config.set('set-from-config-plugin', 'component',
                             ','.join(self.new['component']))
+        # create component_owner option
+        self.env.config.set('set-from-config-plugin','component_owner','test')
 
         admin_command = SetFromConfigAdminCommand(self.env)
 
@@ -158,6 +160,10 @@ class SetFromConfigTestCase(unittest.TestCase):
         admin_command.set_all_from_config()
 
         self.assertItemsEqual(panel.get_component_list(), self.new['component'])
+
+    def test_component_without_owner_is_tracerror(self):
+        """component_owner must be specified"""
+        pass
 
     def test_unconfigured_options_do_not_alter_database(self):
         """missing section options should not alter the database"""
