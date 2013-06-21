@@ -1,3 +1,4 @@
+# todo: import * is not ideal
 from trac.core import *
 from trac.admin import IAdminCommandProvider
 from trac.util.text import printout
@@ -34,7 +35,7 @@ class SetFromConfigAdminCommand(Component):
                None, self.set_all_from_config)
 
     def _get_panels(self):
-        """return a dict of panels"""
+        """return a dict of panel objects"""
         return {
           'priority':    PriorityAdminPanel(self.env),
           'severity':    SeverityAdminPanel(self.env),
@@ -48,21 +49,21 @@ class SetFromConfigAdminCommand(Component):
         Accept list of valid option names, return a dict of option lists.
         TracError if plugin section not found.
         TracError if component option present and component_owner option missing
+        TODO: possibly move error checks out
         """
-        # make sure section exists in trac.ini, else error out
         if self.section_name not in self.config:
             msg = 'section %s not found in config' % self.section_name
             printout(msg)
             raise TracError(msg)
 
-        # get all options, missing options will be set to empty lists
         config_options = {}
         for option_name in option_names:
             config_options[option_name] = self.config[self.section_name].getlist(option_name)
 
-        # if component is not empty
+        # test against the type []? getlist() returns
         if config_options['component']:
             # then component_owner must be set, else TracError
+            # test against the type for none that get() returns
             if not self.config[self.section_name].get('component_owner'):
                 msg = 'component present but component_owner missing in config'
                 printout(msg)
@@ -72,10 +73,8 @@ class SetFromConfigAdminCommand(Component):
         
 
     def set_all_from_config(self):
-        """make database reflect trac.ini config"""
-        # keep track of changes
+        """Make database reflect trac.ini config, print any changes"""
         changes = {}
-        changed = False
 
         panels = self._get_panels()
 
@@ -88,10 +87,9 @@ class SetFromConfigAdminCommand(Component):
                 change = self._set_enum_from_config(panel, config_options[name])
             if change:
                 changes[name] = change
-                changed = True
 
-        if changed:
-            printout(json.dumps({'changed':changed, 'comment':changes}))
+        if changes != {}:
+            printout(json.dumps({'changed':True, 'comment':changes}))
 
 
     def _set_enum_from_config(self, panel, config_items):
@@ -106,7 +104,7 @@ class SetFromConfigAdminCommand(Component):
         changes = {}
 
         # get current_items from Trac database
-        current_items = panel.get_enum_list()
+        current_items = panel.get_enum_list() 
 
         # remove items from database not present in config (trac.ini)
         for current_item in current_items:
@@ -126,6 +124,7 @@ class SetFromConfigAdminCommand(Component):
         """
         similar to _set_enum_from_config however components
         have a different method to get list and also have owners
+        todo: refactor and possibly intersection of lists
         """
         # keep track of what we change
         changes = {}
