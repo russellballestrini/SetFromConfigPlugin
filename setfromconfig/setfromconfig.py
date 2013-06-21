@@ -1,17 +1,31 @@
-# todo: import * is not ideal
-from trac.core import *
+# Normally trac plugins do this: 
+#   from trac.core import *
+# but we feel this is bad practice
+
+# We only raise TracError in this code
+from trac.core import TracError
+
+# All Trac plugins inherit from Component object
+from trac.core import Component
+
+# Interface registry
+from trac.core import implements
+
+# Interface which lets us create trac-admin commands
 from trac.admin import IAdminCommandProvider
-from trac.util.text import printout
 
-# needed to dumps
-import json
-
-# import each of the panels we would like to support
+# Import each of the panels we would like to support
 from trac.ticket.admin import PriorityAdminPanel
 from trac.ticket.admin import SeverityAdminPanel
 from trac.ticket.admin import ResolutionAdminPanel
 from trac.ticket.admin import TicketTypeAdminPanel
 from trac.ticket.admin import ComponentAdminPanel
+
+# Trac suggests using printout over print
+from trac.util.text import printout
+
+# Dump changes dict to json
+import json
 
 
 class SetFromConfigAdminCommand(Component):
@@ -60,11 +74,10 @@ class SetFromConfigAdminCommand(Component):
         for option_name in option_names:
             config_options[option_name] = self.config[self.section_name].getlist(option_name)
 
-        # test against the type []? getlist() returns
-        if config_options['component']:
-            # then component_owner must be set, else TracError
-            # test against the type for none that get() returns
-            if not self.config[self.section_name].get('component_owner'):
+        
+        if len(config_options['component']) > 0:
+            # the component_owner must be set or TracError
+            if self.config[self.section_name].get('component_owner') == '':
                 msg = 'component present but component_owner missing in config'
                 printout(msg)
                 raise TracError(msg)
@@ -81,12 +94,13 @@ class SetFromConfigAdminCommand(Component):
         config_options = self._get_config_options(panels.keys())
 
         for name,panel in panels.items():
-            if name == 'component':
-                change = self._set_component_from_config(panel, config_options[name])
-            else:
-                change = self._set_enum_from_config(panel, config_options[name])
-            if change:
-                changes[name] = change
+            if len(config_options[name]) > 0:
+                if name == 'component':
+                    change = self._set_component_from_config(panel, config_options[name])
+                else:
+                    change = self._set_enum_from_config(panel, config_options[name])
+                if change != {}:
+                    changes[name] = change
 
         if changes != {}:
             printout(json.dumps({'changed':True, 'comment':changes}))
