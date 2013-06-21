@@ -161,9 +161,23 @@ class SetFromConfigTestCase(unittest.TestCase):
 
         self.assertItemsEqual(panel.get_component_list(), self.new['component'])
 
-    def test_component_without_owner_is_tracerror(self):
+    def test_component_without_owner_is_trac_error(self):
         """component_owner must be specified"""
-        pass
+        # We create an instance of the panel so we can check existing values 
+        panel = ComponentAdminPanel(self.env)
+
+        # Check the environment initially contains the default values.
+        self.assertItemsEqual(panel.get_component_list(), self.default['component'])
+
+        # create the section, option, and values in configuration
+        self.env.config.set('set-from-config-plugin', 'component',
+                            ','.join(self.new['component']))
+
+        # we purposely forget to add component_owner to config
+        # and run the plugin expecting a TracError 
+        admin_command = SetFromConfigAdminCommand(self.env)
+        self.assertRaises(TracError,admin_command.set_all_from_config)
+
 
     def test_unconfigured_options_do_not_alter_database(self):
         """missing section options should not alter the database"""
@@ -220,7 +234,7 @@ class SetFromConfigTestCase(unittest.TestCase):
 
         
 
-    def test_missing_section(self):
+    def test_missing_section_is_trac_error(self):
         """missing section should not alter the database"""
 
         panels = {
