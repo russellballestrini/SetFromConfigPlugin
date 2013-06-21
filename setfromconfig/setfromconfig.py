@@ -43,6 +43,34 @@ class SetFromConfigAdminCommand(Component):
           'component':   ComponentAdminPanel(self.env),
         }
 
+    def _get_config_options(self, option_names):
+        """
+        Accept list of valid option names, return a dict of option lists.
+        TracError if plugin section not found.
+        TracError if component option present and component_owner option missing
+        """
+        # make sure section exists in trac.ini, else error out
+        if self.section_name not in self.config:
+            msg = 'section %s not found in config' % self.section_name
+            printout(msg)
+            raise TracError(msg)
+
+        # get all options, missing options will be set to empty lists
+        config_options = {}
+        for option_name in option_names:
+            config_options[option_name] = self.config[self.section_name].getlist(option_name)
+
+        # if component is not empty
+        if config_options['component']:
+            # then component_owner must be set, else TracError
+            if not self.config[self.section_name].get('component_owner'):
+                msg = 'component present but component_owner missing in config'
+                printout(msg)
+                raise TracError(msg)
+
+        return config_options
+        
+
     def set_all_from_config(self):
         """make database reflect trac.ini config"""
         # keep track of changes
@@ -51,11 +79,13 @@ class SetFromConfigAdminCommand(Component):
 
         panels = self._get_panels()
 
+        config_options = self._get_config_options(panels.keys())
+
         for name,panel in panels.items():
-            if name == "component":
-                change = self._set_component_from_config(panel)
+            if name == 'component':
+                change = self._set_component_from_config(panel, config_options[name])
             else:
-                change = self._set_enum_from_config(panel, name)
+                change = self._set_enum_from_config(panel, config_options[name])
             if change:
                 changes[name] = change
                 changed = True
@@ -64,36 +94,16 @@ class SetFromConfigAdminCommand(Component):
             printout(json.dumps({'changed':changed, 'comment':changes}))
 
 
-    def _get_config_items(self, option_name):
+    def _set_enum_from_config(self, panel, config_items):
         """
-        Accept an option_name, fetch and return config_items from config (trac.ini)
-        Raise TracError and exit if section not found!
-        """
-        # check if section exists in trac.ini
-        if self.section_name not in self.config:
-            message = 'section %s not found in config' % self.section_name
-            printout(message)
-            raise TracError(message)
-
-        # from config object, from section object, return list for enum
-        return self.config[self.section_name].getlist(option_name)
-
-    def _set_enum_from_config(self, panel, enum_name):
-        """
-        Accept panel object
-        Fetch config_items from config (trac.ini)
+        Accept panel object and config_items
         Fetch current_items from database
-        * Remove items from database not present in config (trac.ini)
-        * Add items from config (trac.ini) not present in database
+        * Remove items from database not present in config_items (trac.ini)
+        * Add items from config_items (trac.ini) not present in database
         Return dictionary of changes
         """
         # keep track of what we change
         changes = {}
-
-        # get config_items from Trac config (trac.ini)
-        config_items = self._get_config_items(enum_name)
-        if not config_items:
-            return changes
 
         # get current_items from Trac database
         current_items = panel.get_enum_list()
@@ -112,18 +122,13 @@ class SetFromConfigAdminCommand(Component):
 
         return changes
 
-    def _set_component_from_config(self, panel):
+    def _set_component_from_config(self, panel, config_items):
         """
         similar to _set_enum_from_config however components
         have a different method to get list and also have owners
         """
         # keep track of what we change
         changes = {}
-
-        # get config_items (components) from Trac config (trac.ini)
-        config_items = self._get_config_items('component')
-        if not config_items:
-            return changes
 
         # component_owner
         component_owner = self.config[self.section_name].get('component_owner')
