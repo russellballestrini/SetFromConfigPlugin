@@ -180,7 +180,7 @@ class SetFromConfigTestCase(unittest.TestCase):
 
 
     def test_unconfigured_options_do_not_alter_database(self):
-        """missing section options should not alter the database"""
+        """unconfigured options should not alter the database"""
  
         panels = {
           'priority':    PriorityAdminPanel(self.env),
@@ -232,10 +232,8 @@ class SetFromConfigTestCase(unittest.TestCase):
                   self.default[name]
                 )
 
-        
-
     def test_missing_section_is_trac_error(self):
-        """missing section should not alter the database"""
+        """a missing section should not alter the database"""
 
         panels = {
           'priority':    PriorityAdminPanel(self.env),
