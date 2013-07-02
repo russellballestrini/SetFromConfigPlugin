@@ -16,6 +16,21 @@ import json
 
 
 class TicketFieldConfigCommand(Component):
+    """
+    The TicketFieldConfigCommand class is a Trac component (plugin) class which
+    provides an admin command to Trac administrators for setting the standard
+    ticket field values which are usually controlled through the admin web panel
+    via the Trac config file.
+
+    Once this plugin is enabled in may be used through the trac-admin command
+    it exposes which is:
+
+    trac-admin set fields from config
+
+    Issuing this command will cause Trac to apply any changes neccessary to
+    bring the current Trac standard ticket field values in line with what is
+    defined declaratively in the Trac config file.
+    """
     implements(IAdminCommandProvider)
 
     COMPONENT_FIELD_NAME = 'component'
