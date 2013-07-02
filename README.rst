@@ -1,7 +1,7 @@
 TicketFieldConfigPlugin
 ========================
 
-We wrote this Trac plugin because we needed a way to provision and maintain multiple Trac instances via configuration management like salt-stack or puppet.  This Trac plugin extends the trac-admin utility to provide the 'set from config' command.  This command makes it possibly to declare ticket priority, severity, resolution, ticket\_type, and component options in the Trac config (trac.ini) instead of using the interactive admin web panel or trac-admin tools.
+We wrote this Trac plugin because we needed a way to provision and maintain multiple Trac instances via configuration management like salt-stack or puppet.  This Trac plugin extends the trac-admin utility to provide the 'set fields from config' command.  This command makes it possibly to declare ticket priority, severity, resolution, ticket\_type, and component options in the Trac config (trac.ini) instead of using the interactive admin web panel or trac-admin tools.
 
 
 This plugin requires a section labeled *[ticket-field-config]* in the projects trac.ini.
