@@ -1,17 +1,17 @@
-SetFromConfigPlugin
-===================
+TicketFieldConfigPlugin
+========================
 
 We wrote this Trac plugin because we needed a way to provision and maintain multiple Trac instances via configuration management like salt-stack or puppet.  This Trac plugin extends the trac-admin utility to provide the 'set from config' command.  This command makes it possibly to declare ticket priority, severity, resolution, ticket\_type, and component options in the Trac config (trac.ini) instead of using the interactive admin web panel or trac-admin tools.
 
 
-This plugin requires a section labeled *[set-from-config-plugin]* in the projects trac.ini.
+This plugin requires a section labeled *[ticket-field-config]* in the projects trac.ini.
 If this section is missing, this plugin will not perform any changes.
 
 The following shows a complete and valid configuration snippet:
 
 .. code-block::
 
- [set-from-config-plugin]
+ [ticket-field-config]
 
  priority = P1,P2,P3,P4,P90x
  severity = High,Medium,Low,Blocker
@@ -26,7 +26,7 @@ Any options added to this section that are not mentioned above will be ignored.
 
 Warning:
  Always back up your database before trying new plugins.
- The SetFromConfigPlugin alters a Trac project's database to reflect the option listed.
+ This plugin alters the Trac project's database to reflect the options listed.
 
  If an option entry is:
 
