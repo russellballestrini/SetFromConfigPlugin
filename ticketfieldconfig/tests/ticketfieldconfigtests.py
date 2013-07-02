@@ -12,14 +12,14 @@ from trac.ticket.admin import ComponentAdminPanel
 
 from trac.core import TracError
 
-from setfromconfig.setfromconfig import SetFromConfigAdminCommand
+from ticketfieldconfig import TicketFieldConfigCommand
 
-class SetFromConfigTestCase(unittest.TestCase):
+class TicketFieldConfigCommandTests(unittest.TestCase):
 
     def setUp(self):
         """Create Trac env with default_data and our component enabled"""
         self.env = EnvironmentStub(default_data=True,
-                                   enable=['setfromconfig.*'])
+                                   enable=['ticket-field-config.*'])
 
         # this is the default data that is in the test Trac database
         self.default = {
@@ -42,146 +42,146 @@ class SetFromConfigTestCase(unittest.TestCase):
     def test_priority_set_successful(self):
         """
         When we add custom priority enum values to the config
-        and call SetFromConfigAdminCommand.set_all_from_config()
+        and call TicketFieldConfigCommand.set_fields_from_config()
         we expect the Trac environments priority enums to be updated with our
         custom values and removal of the default values.
         """
-        # We create an instance of the panel so we can check existing values 
+        # We create an instance of the panel so we can check existing values
         panel = PriorityAdminPanel(self.env)
 
         # Check the environment initially contains the default values.
         self.assertItemsEqual(panel.get_enum_list(), self.default['priority'])
 
         # create the section, option, and values in configuration
-        self.env.config.set('set-from-config-plugin', 'priority',
+        self.env.config.set('ticket-field-config', 'priority',
                             ','.join(self.new['priority']))
 
-        admin_command = SetFromConfigAdminCommand(self.env)
+        admin_command = TicketFieldConfigCommand(self.env)
 
         # run our plugin
-        admin_command.set_all_from_config()
+        admin_command.set_fields_from_config()
 
         self.assertItemsEqual(panel.get_enum_list(), self.new['priority'])
 
     def test_severity_set_successful(self):
         """
         When we add custom severity enum values to the config
-        and call SetFromConfigAdminCommand.set_all_from_config()
+        and call TicketFieldConfigCommand.set_fields_from_config()
         we expect the Trac environments severity enums to be updated with our
         custom values and removal of the default values.
         """
-        # We create an instance of the panel so we can check existing values 
+        # We create an instance of the panel so we can check existing values
         panel = SeverityAdminPanel(self.env)
 
         # Check the environment initially contains the default values.
         self.assertItemsEqual(panel.get_enum_list(), self.default['severity'])
 
         # create the section, option, and values in configuration
-        self.env.config.set('set-from-config-plugin', 'severity',
+        self.env.config.set('ticket-field-config', 'severity',
                             ','.join(self.new['severity']))
 
-        admin_command = SetFromConfigAdminCommand(self.env)
+        admin_command = TicketFieldConfigCommand(self.env)
 
         # run our plugin
-        admin_command.set_all_from_config()
+        admin_command.set_fields_from_config()
 
         self.assertItemsEqual(panel.get_enum_list(), self.new['severity'])
 
     def test_resolution_set_successful(self):
         """
         When we add custom resolution enum values to the config
-        and call SetFromConfigAdminCommand.set_all_from_config()
+        and call TicketFieldConfigCommand.set_fields_from_config()
         we expect the Trac environments resolution enums to be updated with our
         custom values and removal of the default values.
         """
-        # We create an instance of the panel so we can check existing values 
+        # We create an instance of the panel so we can check existing values
         panel = ResolutionAdminPanel(self.env)
 
         # Check the environment initially contains the default values.
         self.assertItemsEqual(panel.get_enum_list(), self.default['resolution'])
 
         # create the section, option, and values in configuration
-        self.env.config.set('set-from-config-plugin', 'resolution',
+        self.env.config.set('ticket-field-config', 'resolution',
                             ','.join(self.new['resolution']))
 
-        admin_command = SetFromConfigAdminCommand(self.env)
+        admin_command = TicketFieldConfigCommand(self.env)
 
         # run our plugin
-        admin_command.set_all_from_config()
+        admin_command.set_fields_from_config()
 
         self.assertItemsEqual(panel.get_enum_list(), self.new['resolution'])
 
     def test_ticket_type_set_successful(self):
         """
         When we add custom ticket_type enum values to the config
-        and call SetFromConfigAdminCommand.set_all_from_config()
+        and call TicketFieldConfigCommand.set_fields_from_config()
         we expect the Trac environments ticket_type enums to be updated with our
         custom values and removal of the default values.
         """
-        # We create an instance of the panel so we can check existing values 
+        # We create an instance of the panel so we can check existing values
         panel = TicketTypeAdminPanel(self.env)
 
         # Check the environment initially contains the default values.
         self.assertItemsEqual(panel.get_enum_list(), self.default['ticket_type'])
 
         # create the section, option, and values in configuration
-        self.env.config.set('set-from-config-plugin', 'ticket_type',
+        self.env.config.set('ticket-field-config', 'ticket_type',
                             ','.join(self.new['ticket_type']))
 
-        admin_command = SetFromConfigAdminCommand(self.env)
+        admin_command = TicketFieldConfigCommand(self.env)
 
         # run our plugin
-        admin_command.set_all_from_config()
+        admin_command.set_fields_from_config()
 
         self.assertItemsEqual(panel.get_enum_list(), self.new['ticket_type'])
 
     def test_component_set_successful(self):
         """
         When we add custom component enum values to the config
-        and call SetFromConfigAdminCommand.set_all_from_config()
+        and call TicketFieldConfigCommand.set_fields_from_config()
         we expect the Trac environments component enums to be updated with our
         custom values and removal of the default values.
         """
-        # We create an instance of the panel so we can check existing values 
+        # We create an instance of the panel so we can check existing values
         panel = ComponentAdminPanel(self.env)
 
         # Check the environment initially contains the default values.
         self.assertItemsEqual(panel.get_component_list(), self.default['component'])
 
         # create the section, option, and values in configuration
-        self.env.config.set('set-from-config-plugin', 'component',
+        self.env.config.set('ticket-field-config', 'component',
                             ','.join(self.new['component']))
         # create component_owner option
-        self.env.config.set('set-from-config-plugin','component_owner','test')
+        self.env.config.set('ticket-field-config','component_owner','test')
 
-        admin_command = SetFromConfigAdminCommand(self.env)
+        admin_command = TicketFieldConfigCommand(self.env)
 
         # run our plugin
-        admin_command.set_all_from_config()
+        admin_command.set_fields_from_config()
 
         self.assertItemsEqual(panel.get_component_list(), self.new['component'])
 
     def test_component_without_owner_is_trac_error(self):
         """component_owner must be specified"""
-        # We create an instance of the panel so we can check existing values 
+        # We create an instance of the panel so we can check existing values
         panel = ComponentAdminPanel(self.env)
 
         # Check the environment initially contains the default values.
         self.assertItemsEqual(panel.get_component_list(), self.default['component'])
 
         # create the section, option, and values in configuration
-        self.env.config.set('set-from-config-plugin', 'component',
+        self.env.config.set('ticket-field-config', 'component',
                             ','.join(self.new['component']))
 
         # we purposely forget to add component_owner to config
-        # and run the plugin expecting a TracError 
-        admin_command = SetFromConfigAdminCommand(self.env)
-        self.assertRaises(TracError,admin_command.set_all_from_config)
+        # and run the plugin expecting a TracError
+        admin_command = TicketFieldConfigCommand(self.env)
+        self.assertRaises(TracError,admin_command.set_fields_from_config)
 
 
     def test_unconfigured_options_do_not_alter_database(self):
         """unconfigured options should not alter the database"""
- 
+
         panels = {
           'priority':    PriorityAdminPanel(self.env),
           'severity':    SeverityAdminPanel(self.env),
@@ -204,12 +204,12 @@ class SetFromConfigTestCase(unittest.TestCase):
                 )
 
         # create the section, option, and values in configuration
-        self.env.config.set('set-from-config-plugin', 'ticket_type',
+        self.env.config.set('ticket-field-config', 'ticket_type',
                             ','.join(self.new['ticket_type']))
 
         # run our plugin
-        admin_command = SetFromConfigAdminCommand(self.env)
-        admin_command.set_all_from_config()
+        admin_command = TicketFieldConfigCommand(self.env)
+        admin_command.set_fields_from_config()
 
         # verify that specified configuration options altered database
         self.assertItemsEqual(
@@ -244,10 +244,10 @@ class SetFromConfigTestCase(unittest.TestCase):
         }
 
         # run our plugin
-        admin_command = SetFromConfigAdminCommand(self.env)
+        admin_command = TicketFieldConfigCommand(self.env)
 
         # TracError when [set-from-config-plugin] missing and admin cmd invoked
-        self.assertRaises(TracError, admin_command.set_all_from_config)
+        self.assertRaises(TracError, admin_command.set_fields_from_config)
 
         # verify that the missing section does not alter db
         for name, panel in panels.items():
@@ -261,7 +261,7 @@ class SetFromConfigTestCase(unittest.TestCase):
                   panel.get_enum_list(),
                   self.default[name]
                 )
- 
+
     def test_no_options_in_section(self):
         """present section but missing options should not alter the database"""
 
@@ -274,11 +274,11 @@ class SetFromConfigTestCase(unittest.TestCase):
         }
 
         # create the section, but no options or values in configuration
-        self.env.config.set('set-from-config-plugin','','')
+        self.env.config.set('ticket-field-config','','')
 
         # run our plugin
-        admin_command = SetFromConfigAdminCommand(self.env)
-        admin_command.set_all_from_config()
+        admin_command = TicketFieldConfigCommand(self.env)
+        admin_command.set_fields_from_config()
 
         # verify that present section but missing options does not alter db
         for name, panel in panels.items():
@@ -305,11 +305,11 @@ class SetFromConfigTestCase(unittest.TestCase):
         }
 
         # create the section with invalid option and values in configuration
-        self.env.config.set('set-from-config-plugin','nintendo','mario,pacman')
+        self.env.config.set('ticket-field-config','nintendo','mario,pacman')
 
         # run our plugin
-        admin_command = SetFromConfigAdminCommand(self.env)
-        admin_command.set_all_from_config()
+        admin_command = TicketFieldConfigCommand(self.env)
+        admin_command.set_fields_from_config()
 
         # verify that invalid options in section does not alter db
         for name, panel in panels.items():
@@ -323,4 +323,3 @@ class SetFromConfigTestCase(unittest.TestCase):
                   panel.get_enum_list(),
                   self.default[name]
                 )
-
