@@ -67,7 +67,7 @@ class TicketFieldConfigCommand(Component):
         field_values = self._get_field_values()
         for field_name, values in field_values.items():
             field_changes = self._set_field_values_from_config(field_name,
-                                                               values)
+                              values)
             if field_changes is not None:
                 changes[field_name] = field_changes
 
@@ -130,14 +130,25 @@ class TicketFieldConfigCommand(Component):
         values_to_remove = set(current_values) - set(field_values)
         values_to_add = set(field_values) - set(current_values)
 
-        self._remove_values_from_database(field_name,
-                                          values_to_remove)
+        self._remove_values_from_database(field_name, values_to_remove)
         self._add_values_to_database(field_name, values_to_add)
 
-        if len(values_to_add) > 0 or len(values_to_remove) > 0:
+        # current_order is an empty list if field_name is 'component'
+        current_order = self.get_current_order(field_name)
+        desired_order = field_values
+
+        # determine if the enums (field_values) are in proper order
+        diff_order = list_order_diff(current_order,desired_order)
+
+        if len(diff_order) > 0:
+            # we need to reorder enums
+            self._reorder_field_values(field_name, desired_order)
+
+        if len(values_to_add) + len(values_to_remove) + len(diff_order) > 0:
             field_changes = {
-                'Added': list(values_to_add),
-                'Removed': list(values_to_remove)
+                'Added'   : list(values_to_add),
+                'Removed' : list(values_to_remove),
+                'Reordered' : diff_order
             }
 
         return field_changes
@@ -171,3 +182,42 @@ class TicketFieldConfigCommand(Component):
                     self.config[field_name].get(self.COMPONENT_OWNER_FIELD))
             else:
                 self.panels[field_name]._do_add(value)
+
+    def get_enums_from_panel(self, panel_name):
+        """
+        Return a list of all enum objects for a given panel_name
+        """
+        return self.panels[panel_name]._enum_cls.select(self.env)
+
+    def get_current_order(self, panel_name):
+        """
+        Return a list of ordered enum.names from DB for a given panel_name
+        return an empty list if panel_name is 'component'
+        """
+        # Line 776 in trac/ticket/model.py:
+        # get_enum_list() returns a list of enums ORDER BY value.
+        # Value is the "display position" in Trac
+        if panel_name == self.COMPONENT_FIELD_NAME:
+            return []
+        return self.panels[panel_name].get_enum_list()
+
+    def _reorder_field_values(self, field_name, desired_order):
+        """
+        Order the field values by the order in the configuration file
+        """
+        enums = self.get_enums_from_panel(field_name)
+
+        for enum in enums:
+            enum.value = desired_order.index(enum.name) + 1
+            enum.update()
+
+
+def list_order_diff(list1,list2):
+    """
+    Accept two list parameters
+    Return a list of order differences between two lists
+    """
+    # warning: truncates the larger list to the smaller
+    return [(i,j) for i,j in zip(list1,list2) if i!=j]
+
+

@@ -34,7 +34,7 @@ class TicketFieldConfigCommandTests(unittest.TestCase):
         self.new = {
           'priority': ['P1','P2','P3'],
           'severity': ['High','Medium','Low'],
-          'resolution': ['Fixed','Invalid','Cancelled'],
+          'resolution': ['fixed','wontfix','invalid','duplicate','worksforme'],
           'ticket_type': ['Bug','Release','Project'],
           'component': ['new/blog','new/site','old/blog','old/site'],
         }
@@ -323,3 +323,56 @@ class TicketFieldConfigCommandTests(unittest.TestCase):
                   panel.get_enum_list(),
                   self.default[name]
                 )
+        panel = PriorityAdminPanel(self.env)
+
+    def test_get_current_order(self):
+        """
+        Test that get_current_order() method returns a list of enum names
+        ordered by enum values or empty list if panel_name is component
+        """
+
+        #create instance of our plugin
+        admin_command = TicketFieldConfigCommand(self.env)
+
+        # create the section, option, and values in configuration
+        self.env.config.set('ticket-field-config', 'resolution',
+                            ','.join(self.new['resolution']))
+
+        # test before plugin, enum_names == self.default['resolution']
+        enum_names = admin_command.get_current_order('resolution')
+        self.assertEqual(enum_names, self.default['resolution'])
+
+        # run our plugin
+        admin_command.set_fields_from_config()
+
+        # test after plugin, enum_names == self.new['resolution']
+        enum_names = admin_command.get_current_order('resolution')
+        self.assertEqual(enum_names, self.new['resolution'])
+
+        # test panel_name == 'component' == []
+        enum_names = admin_command.get_current_order('component')
+        self.assertEqual(enum_names, [])
+
+    def test_reorder_field_values(self):
+        """
+        test that field values are reordered to match configuration
+        """
+        # We create an instance of the panel so we can check existing values
+        panel = ResolutionAdminPanel(self.env)
+
+        # Check the environment initially contains the default values
+        self.assertItemsEqual(panel.get_enum_list(), self.default['resolution'])
+
+        # create the section, option, and values in configuration
+        self.env.config.set('ticket-field-config', 'resolution',
+                            ','.join(self.new['resolution']))
+
+        admin_command = TicketFieldConfigCommand(self.env)
+
+        # run our plugin
+        admin_command.set_fields_from_config()
+
+        # assert order was adjusted
+        self.assertEqual(panel.get_enum_list(), self.new['resolution'])
+
+

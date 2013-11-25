@@ -1,8 +1,9 @@
 TicketFieldConfigPlugin
 ========================
 
-We wrote this Trac plugin because we needed a way to provision and maintain multiple Trac instances via configuration management like salt-stack or puppet.  This Trac plugin extends the trac-admin utility to provide the 'set fields from config' command.  This command makes it possibly to declare ticket priority, severity, resolution, ticket\_type, and component options in the Trac config (trac.ini) instead of using the interactive admin web panel or trac-admin tools.
+We wrote this Trac plugin because we needed a way to provision and maintain multiple Trac instances via configuration management like salt-stack or puppet.  This Trac plugin extends the trac-admin utility to provide the 'set fields from config' command.  
 
+This command makes it possibly to declare ticket priority, severity, resolution, ticket\_type, and component options in the Trac config (trac.ini) instead of using the interactive admin web panel or trac-admin tools.
 
 This plugin requires a section labeled *[ticket-field-config]* in the projects trac.ini.
 If this section is missing, this plugin will not perform any changes.
@@ -32,5 +33,36 @@ Warning:
 
  * in the database but not in the configuration, it will be removed.
  * not in the database but is in the configuration, it will be added.
+ * in the wrong "order" position, it will be corrected
+
+Install
+----------
+
+create an egg from this source code
+
+.. code-block:: bash
+
+ python setup.py bdist_egg
+
+copy the egg from dist into your Trac projects plugins directory
+
+Tests
+-------
 
 This plugin has great test coverage.  : ) 
+
+Before running tests you need to install trac.
+
+Use a virtualenv, and run this command:
+
+.. code-block:: bash
+
+ pip install trac
+
+Now run tests with this:
+
+.. code-block:: bash
+
+ nosetests
+
+
