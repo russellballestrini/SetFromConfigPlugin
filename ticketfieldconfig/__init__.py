@@ -208,8 +208,10 @@ class TicketFieldConfigCommand(Component):
         enums = self.get_enums_from_panel(field_name)
 
         for enum in enums:
-            enum.value = desired_order.index(enum.name) + 1
-            enum.update()
+            proper_position = desired_order.index(enum.name) + 1
+            if enum.value != proper_position:
+                enum.value = proper_position
+                enum.update()
 
 
 def list_order_diff(list1,list2):
